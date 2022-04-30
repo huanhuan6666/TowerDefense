@@ -1,0 +1,5 @@
+# 忽略文件夹
+/Pro2/.vs/
+/Pro2/.idea/
+*.zip
+/build-Pro2-Desktop_Qt_5_12_12_MinGW_64_bit-Debug/
