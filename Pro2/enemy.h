@@ -5,6 +5,7 @@
 #include "common.h"
 
 class Tower;
+class Bullet;
 
 class Enemy
 {
@@ -31,6 +32,9 @@ public:
     Map* map; //地图组件
     const vector<vector<Cell>>& game_map;   //原始的cell二维数组地图
     vector<Tower *> &tower_all;       //场景中所有塔
+    Tower *target_tower;              //要攻击的目标敌人 可以有不同的选择策略
+
+    vector<Bullet *> bullet_all;      //自己发射出的所有子弹
 
 public:
     Enemy(const vector<Pos_t>& _path, Map *map, vector<Tower *>& tower_all);

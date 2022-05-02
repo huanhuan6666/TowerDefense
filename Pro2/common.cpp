@@ -24,7 +24,10 @@ Cell::Cell(int x, int y, int s, int d): row(x), col(y), state(s), next_move(d), 
             looks = new QPixmap("../source/tower.png");
             break;
         case REMOTE: //4我方远程
-            looks = new QPixmap("../source/TStar-hd.png");
+            looks = new QPixmap("../source/remote_path.png");
+            break;
+        case FLY_PATH: //5飞行路径
+            looks = new QPixmap("../source/fly-path.png");
             break;
     }
 

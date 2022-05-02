@@ -9,29 +9,34 @@ Map::Map(vector<vector<string>> map_config)
     for(int i = 0; i < row; i++){
         for(int j = 0; j < col; j++){
             switch (stoi(map_config[i][j])) {
-                case 0: {//WALL是墙
+                case WALL: {//WALL是墙
                     Cell tmp0(i, j, 0, 0);
                     game_map[i].push_back(tmp0);
                     break;
                 }
-                case 1: {//路径
+                case PATH: {//路径
                     Cell tmp1(i, j, 1, 0);
                     game_map[i].push_back(tmp1);
                     break;
                 }
-                case 2: {//起点
+                case BEGIN: {//起点
                     Cell tmp2(i, j, 2, 0);
                     game_map[i].push_back(tmp2);
                     break;
                 }
-                case 3: {//终点
+                case END: {//终点
                     Cell tmp3(i, j, 3, 0);
                     game_map[i].push_back(tmp3);
                     break;
                 }
-                case 4: { //远程
+                case REMOTE: { //远程
                     Cell tmp4(i, j, 4, 0);
                     game_map[i].push_back(tmp4);
+                    break;
+                }
+                case FLY_PATH: { //飞行路径
+                    Cell tmp5(i, j, 5, 0);
+                    game_map[i].push_back(tmp5);
                     break;
                 }
                 default:{
@@ -57,14 +62,14 @@ void Map::dfs(vector<vector<string>>& map_config, int i, int j, vector<Pos_t>& a
     if(state == -1 || state == 0 || state == 4) //终止条件
         return;
 
-    if(state == 3) { //3为终点 此时a_path即为一条路径
+    if(state == END) { //3为终点 此时a_path即为一条路径
         Pos_t tmp(i, j);
         a_path.push_back(tmp);
         all_paths.push_back(a_path);
         return;
     }
 
-    if(state == 1 || state == 2) { //1路径 或者2起点继续递归
+    if(state == PATH || state == BEGIN || state == FLY_PATH) { //1路径5飞行路径 或者2起点继续递归
         Pos_t tmp(i, j);
         a_path.push_back(tmp); //这一步
         for(int c = 0; c < 4; c++) { //递归下一步
@@ -82,7 +87,7 @@ void Map::getPaths(vector<vector<string>>& map_config) {
 
     for(int i = 0; i < row; i++){ //row对应y坐标
         for(int j = 0; j < col; j++){ //col对应x坐标
-            if(stoi(map_config[i][j]) == 2) {//2为起点
+            if(stoi(map_config[i][j]) == BEGIN) {//2为起点
                 vector<Pos_t> a_path;
                 dfs(map_config, i, j, a_path);
             }
@@ -90,7 +95,7 @@ void Map::getPaths(vector<vector<string>>& map_config) {
                 continue;
         }
     }
-    for(auto& path: all_paths){
+    for(auto& path: all_paths) {
         int size = path.size();
         for(int i = 0; i < size - 1; i++) {
             int in_row = path[i+1].row - path[i].row;

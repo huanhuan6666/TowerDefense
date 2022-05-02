@@ -17,7 +17,7 @@ using namespace std;
 
 //地图配置文件
 const string map_file = "../map_config_default.txt";
-
+const double PI = 3.14;
 enum DirectIndex{ //每个格子上的行走方向 -1 不动 0上 1下 2左 3右
     NONE=-1,
     UP=0,
@@ -42,12 +42,14 @@ enum STATE{ //格子的状态
     END     =3,     //路径终点
 
     REMOTE  =4,     //我方远程单位
+    FLY_PATH=5,     //飞行路径
 };
 
 enum ENEMY_STATE { //敌人的状态
     DEAD = 0,
     LIVE = 1,
     BLOCKED = 2, //被阻拦
+    ATTACK = 3,  //好战的敌人攻击时会停下来
 };
 
 const int kCellLen = 80; //单元格边长
@@ -91,4 +93,11 @@ inline ostream& operator<<(ostream& out, const Cell &c) {
 inline double Distance(double x1, double y1, double x2, double y2) {
     return sqrt((x1-x2)*(x1-x2) + (y1-y2)*(y1-y2));
 }
+
+// 计算点(x1, y1)是否在左上角为 (x2, y2) 宽为w 高为h的区域内
+inline bool InArea(double x1, double y1, double x2, double y2, double w, double h) {
+    return (x1 >= x2 && x1 <= x2 + w) &&
+            (y1 >= y2 && y1 <= y2 + h);
+}
+
 #endif // COMMON_H

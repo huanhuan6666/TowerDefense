@@ -1,4 +1,4 @@
-QT       += core gui
+QT       += core gui multimedia
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -11,31 +11,43 @@ CONFIG += c++11
 SOURCES += \
     common.cpp \
     enemy.cpp \
+    enemybuff.cpp \
     enemynear.cpp \
     enemyremote.cpp \
+    enemysuper.cpp \
     flyafraid.cpp \
     flybrave.cpp \
     gamewindow.cpp \
     main.cpp \
     mainwindow.cpp \
     map.cpp \
+    scientist.cpp \
     spikeweed.cpp \
+    torchwood.cpp \
     tower.cpp \
-    towernut.cpp
+    towernut.cpp \
+    towerremote.cpp \
+    towersuper.cpp
 
 HEADERS += \
     common.h \
     enemy.h \
+    enemybuff.h \
     enemynear.h \
     enemyremote.h \
+    enemysuper.h \
     flyafraid.h \
     flybrave.h \
     gamewindow.h \
     mainwindow.h \
     map.h \
+    scientist.h \
     spikeweed.h \
+    torchwood.h \
     tower.h \
-    towernut.h
+    towernut.h \
+    towerremote.h \
+    towersuper.h
 
 FORMS += \
     mainwindow.ui

@@ -5,19 +5,25 @@
 
 #include "enemynear.h"
 #include "enemyremote.h"
+#include "enemysuper.h"
+#include "enemybuff.h"
 #include "flyafraid.h"
 #include "flybrave.h"
 
-#include "towernut.h"
 #include "spikeweed.h"
-#include "tower.h"
+#include "towernut.h"
+#include "torchwood.h"
+#include "scientist.h"
+#include "towerremote.h"
+#include "towersuper.h"
 
 #include<QLabel>
 #include<QWidget>
 #include<QMainWindow>
 #include<QTimer>
 #include<QMouseEvent>
-
+#include<QMediaPlayer>
+#include<QMediaPlaylist>
 
 class GameWindow : public QWidget
 {
@@ -31,6 +37,9 @@ public:
 
     QLabel* money_lable;            //显示当前钱数
     QLabel* health_lable;           //显示当生命
+    QLabel* money;
+    QLabel* health;
+
     int my_health;                  //我的生命
     int my_money;                   //我的钱
     int waves;                      //敌人波数

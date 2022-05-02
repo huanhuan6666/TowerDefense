@@ -60,7 +60,7 @@ int EnemyNear::update_each() {
     //寻找范围内所有近战单位塔攻击
     vector<Tower *> tower2attack;
     for(auto tower : tower_all) {
-        if(tower->type == 1) { //坚果塔
+        if(tower->type <= 4) {
             //二者中心距离在攻击范围内
             if(Distance(x + weight/2, y + height/2, tower->x + tower->weight/2, tower->y + tower->height/2) < this->range) {
                 tower2attack.push_back(tower);

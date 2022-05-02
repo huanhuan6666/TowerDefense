@@ -4,7 +4,7 @@
 SpikeWeed::SpikeWeed(int r, int c, vector<Enemy *>& enemy_all) : Tower(r, c, enemy_all)
 {
     type = 2; //地刺
-
+    step = 0;
     all_health = 100;
     cur_health = 100;
     level = 1;
@@ -34,13 +34,12 @@ int SpikeWeed::update_each() {
 
     // 并且攻击范围内的敌人
     vector<Enemy *> enemy2attack;
-    for(auto enemy : enemy_all) {
+    for(auto& enemy : enemy_all) {
         //敌人图元的中心坐标
         int e_cx =  enemy->x + enemy->weight/2, e_cy =  enemy->y + enemy->height/2;
         //攻击范围内的地面敌人
         if(enemy->type <= 4  &&
-            ((e_cx == t_cx && abs(e_cy - t_cy) < range) ||
-            (e_cy == t_cy && abs(e_cx - t_cx) < range)))
+           abs(e_cx - t_cx) < range && abs(e_cy - t_cy) < range)
         {
             enemy->cur_health -= damage;
         }

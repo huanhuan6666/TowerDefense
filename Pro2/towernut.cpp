@@ -5,6 +5,7 @@ TowerNut::TowerNut(int r, int c, vector<Enemy *>& enemy_all): Tower(r, c, enemy_
 {
     type = 1; //攻击力为0 坚果
 
+    step = 0;
     all_health = 100;
     cur_health = 100;
     level = 1;
@@ -54,12 +55,12 @@ int TowerNut::update_each() {
     int t_cx = x + weight/2, t_cy = y + height/2; //图元中心坐标
     //阻拦敌人
 
-    for(auto enemy : enemy_all) {
+    for(auto& enemy : enemy_all) {
         //敌人图元的中心坐标
         int e_cx =  enemy->x + enemy->weight/2, e_cy =  enemy->y + enemy->height/2;
         //只能阻拦all_block个地面敌人
         if(enemy->type <= 4 && cur_block < all_block &&
-          ((e_cx == t_cx && abs(e_cy - t_cy) < range) ||(e_cy == t_cy && abs(e_cx - t_cx) < range)))
+          (abs(e_cx - t_cx) < range && abs(e_cy - t_cy) < range) )
         {
             enemy->state = BLOCKED;
             cur_block += 1;
