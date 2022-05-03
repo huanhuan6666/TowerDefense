@@ -127,8 +127,10 @@ int EnemySuper::update_each() {
     vector<Tower *> tower2attack;
     for(auto tower : tower_all) {
         //二者中心距离在攻击范围内
-        if(Distance(x + weight/2, y + height/2, tower->x + tower->weight/2, tower->y + tower->height/2) < this->range) {
-            tower2attack.push_back(tower);
+        if(tower->type != 2) { //地刺不能攻击
+            if(Distance(x + weight/2, y + height/2, tower->x + tower->weight/2, tower->y + tower->height/2) < this->range) {
+                tower2attack.push_back(tower);
+            }
         }
 
     }

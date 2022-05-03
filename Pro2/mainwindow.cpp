@@ -9,19 +9,56 @@ MainWindow::MainWindow(QWidget *parent)
 {
 
     ui->setupUi(this);
-    //setFixedSize(800, 600);
-    setFixedSize(1140, 800);
+    this->setObjectName("mainWindow");
+    this->setStyleSheet("#mainWindow{border-image:url(../source/Bg.png);}");
+    setFixedSize(600, 400);
+
+    //setFixedSize(1140, 800);
     setWindowTitle("ProJect_2");
-    //show();
 
-    generateMap();   //扫描配置文件生成地图到map
+    QPushButton *level1 = new QPushButton(this);
+    level1->move(100, 200);
+    level1->setText("关卡一");
+    QPushButton *level2 = new QPushButton(this);
+    level2->move(220, 200);
+    level2->setText("关卡二");
+    QPushButton *level3 = new QPushButton(this);
+    level3->move(330, 200);
+    level3->setText("关卡三");
 
-    auto all_paths = map->all_paths;
-    int path_counts = all_paths.size();
+    connect(level1, &QPushButton::clicked, [&]()
+    {
+        generateMap("../map_config_default1.txt");   //扫描配置文件生成地图到map
+        auto all_paths = map->all_paths;
+        //int path_counts = all_paths.size();
 
-    game = new GameWindow(map);
-    game->setParent(this);
-    //game->show();
+        game = new GameWindow(map);
+        game->show();
+        close();
+    });
+    connect(level2, &QPushButton::clicked, [&]()
+    {
+        generateMap("../map_config_default2.txt");   //扫描配置文件生成地图到map
+        auto all_paths = map->all_paths;
+        //int path_counts = all_paths.size();
+
+        game = new GameWindow(map);
+        game->show();
+        close();
+    });
+    connect(level3, &QPushButton::clicked, [&]()
+    {
+        generateMap("../map_config_default3.txt");   //扫描配置文件生成地图到map
+        auto all_paths = map->all_paths;
+        //int path_counts = all_paths.size();
+
+        game = new GameWindow(map);
+        game->show();
+        close();
+    });
+
+    show();
+
 
 }
 
@@ -32,15 +69,15 @@ MainWindow::~MainWindow()
 
 //绘图事件
 void MainWindow::paintEvent(QPaintEvent *){
-    /*cout << "paint mainwindow!!!" << endl;
-    QPainter painter(this);
+    //cout << "paint mainwindow!!!" << endl;
+    /*QPainter painter(this);
     QPixmap pixmap("../source/Bg.png");
     //添加主界面背景
     painter.drawPixmap(0,0,this->width(),this->height(),pixmap);*/
 }
 
 //根据配置文件生成地图
-void MainWindow::generateMap() {
+void MainWindow::generateMap(const string& map_file) {
     ifstream fin(map_file);
     if(!fin) {
         cout << "open file fail!" << endl;

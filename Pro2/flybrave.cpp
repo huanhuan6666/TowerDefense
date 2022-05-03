@@ -23,7 +23,7 @@ FlyBrave::FlyBrave(const vector<Pos_t>& _path, Map *map, vector<Tower *>& tower_
 
     interval = 5; //调用五次
     counter = 0;
-    range = 2 * kCellLen;
+    range = 300;
 }
 
 //tower2attack为攻击范围内的塔们 这里的策略是全都攻击一遍
@@ -126,8 +126,10 @@ int FlyBrave::update_each() {
     //寻找范围内所有近战塔和远程塔攻击
     vector<Tower *> tower2attack;
     for(auto tower : tower_all) {
-        if(Distance(x + weight/2, y + height/2, tower->x + tower->weight/2, tower->y + tower->height/2) < this->range) {
-            tower2attack.push_back(tower);
+        if(tower->type != 2) { //地刺不能攻击
+            if(Distance(x + weight/2, y + height/2, tower->x + tower->weight/2, tower->y + tower->height/2) < this->range) {
+                tower2attack.push_back(tower);
+            }
         }
     }
     attack_tower(tower2attack);

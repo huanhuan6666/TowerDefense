@@ -3,6 +3,7 @@
 
 #include <QMainWindow>
 #include <QTimer>
+#include <QPushButton>
 #include <QVector>
 #include "gamewindow.h"
 #include "enemy.h"
@@ -21,7 +22,7 @@ class MainWindow : public QMainWindow
 public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
-    void generateMap(); //根据配置文件生成地图
+    void generateMap(const string& map_file); //根据配置文件生成地图
     void paintEvent(QPaintEvent *) override;
 
 

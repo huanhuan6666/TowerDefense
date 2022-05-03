@@ -1,9 +1,18 @@
 ﻿#include "gamewindow.h"
+#include "mainwindow.h"
 #include<QDebug>
 
 GameWindow::GameWindow(Map *map): map(map), all_paths(map->all_paths), game_map(map->game_map),
-    my_health(100), my_money(100)
+    my_health(100), my_money(1500), waves(0), waves_fly(0), counter(50)
 {
+    path_count = all_paths.size();
+    for(int i = 0; i < path_count; i++) {
+        if(game_map[all_paths[i][1].row][all_paths[i][1].col].state == FLY_PATH) {
+            fly_index.push_back(i);
+            cout << i << endl;
+        }
+    }
+
     setFixedSize(1040, 800);
     //setFixedSize(1080, 900);
     setWindowTitle("游戏界面");
@@ -12,6 +21,7 @@ GameWindow::GameWindow(Map *map): map(map), all_paths(map->all_paths), game_map(
     health_lable = new QLabel(this);
     money = new QLabel(this);
     health = new QLabel(this);
+    selectbox = new SelectBox();
 
     //金钱标签
     QPixmap image0("../source/qian.png");
@@ -39,13 +49,27 @@ GameWindow::GameWindow(Map *map): map(map), all_paths(map->all_paths), game_map(
     health_lable->setText(QString("生命：%1").arg(my_health));
 
 
-    //驱动敌游戏计时器 扫描enemy_all上的每个enemy调用其update
+    //驱动敌游戏计时器
     update_timer = new QTimer(this);
     update_timer->start(100);
 
-    update_timer = new QTimer(this);
-    update_timer->start(100);
-    connect(update_timer, &QTimer::timeout, this, &GameWindow::update_all);
+    //connect(update_timer, &QTimer::timeout, this, &GameWindow::update_all);
+    connect(update_timer, &QTimer::timeout, [&]()
+    {
+        int result = update_all();
+        if(result == 1) { //游戏失败
+            //MainWindow* w  = new MainWindow();
+            update_timer->stop();
+            get_enemy_timer->stop();
+            //w->show();
+            //close();
+        }
+        else if(result == 2) { //游戏胜利
+            update_timer->stop();
+            get_enemy_timer->stop();
+            cout << "WIN!!!!" << " score is " << my_health/100 * my_money << endl;
+        }
+    });
 
     //生产敌人计时器
     get_enemy_timer = new QTimer(this);
@@ -66,6 +90,22 @@ GameWindow::GameWindow(Map *map): map(map), all_paths(map->all_paths), game_map(
     waves = 0; //波数
 }
 
+//析构函数
+GameWindow::~GameWindow() {
+    delete map;
+    delete selectbox;
+    delete update_timer;
+    delete get_enemy_timer;
+    delete money_lable;
+    delete health_lable;
+    delete money;
+    delete health;
+    for(auto& enemy : enemy_all)
+        delete enemy;
+    for(auto& tower: tower_all)
+        delete tower;
+}
+
 //生产敌人
 void GameWindow::generateEnemy() {
     /*for(int i = 0; i < 4; i++) {
@@ -75,7 +115,160 @@ void GameWindow::generateEnemy() {
     }*/
     //Enemy *test_enemy = new FlyAfraid(all_paths[1], map, tower_all);
     //enemy_all.push_back(test_enemy);
-    switch (waves) {
+    if(counter >=0 && counter <= 15) {
+        //先在一条路径上产生敌人
+        if(game_map[all_paths[0][1].row][all_paths[0][1].col].state != FLY_PATH) {
+            switch (waves) {
+            case 0: {
+                Enemy *test_enemy = new EnemyNear(all_paths[0], map, tower_all);
+                enemy_all.push_back(test_enemy);
+                waves = 1;
+                break;
+            }
+            case 1: {
+                Enemy *test_enemy = new EnemyRemote(all_paths[0], map, tower_all);
+                enemy_all.push_back(test_enemy);
+                waves = 2;
+                break;
+            }
+            case 2: {
+                Enemy *test_enemy = new EnemySuper(all_paths[0], map, tower_all);
+                enemy_all.push_back(test_enemy);
+                waves = 3;
+                break;
+            }
+            case 3: {
+                Enemy *test_enemy = new EnemyBuff(all_paths[0], map, tower_all, enemy_all);
+                enemy_all.push_back(test_enemy);
+                waves = 0;
+                break;
+            }
+            }
+        }
+        else {
+            switch (waves_fly) {
+            case 0: {
+                Enemy *test_enemy = new FlyAfraid(all_paths[0], map, tower_all);
+                enemy_all.push_back(test_enemy);
+                waves_fly = 1;
+                break;
+            }
+            case 1: {
+                Enemy *test_enemy = new FlyBrave(all_paths[0], map, tower_all);
+                enemy_all.push_back(test_enemy);
+                waves_fly = 0;
+                break;
+            }
+            }
+        }
+    }
+    else if(counter > 15 && counter <= 30) { //只在地面路径产生敌人
+        for(int i = 0; i < path_count; i++) {
+            if(game_map[all_paths[i][1].row][all_paths[i][1].col].state != FLY_PATH) {
+                switch (waves) {
+                case 0: {
+                    Enemy *test_enemy = new EnemyNear(all_paths[i], map, tower_all);
+                    enemy_all.push_back(test_enemy);
+                    waves = 1;
+                    break;
+                }
+                case 1: {
+                    Enemy *test_enemy = new EnemyRemote(all_paths[i], map, tower_all);
+                    enemy_all.push_back(test_enemy);
+                    waves = 2;
+                    break;
+                }
+                case 2: {
+                    Enemy *test_enemy = new EnemySuper(all_paths[i], map, tower_all);
+                    enemy_all.push_back(test_enemy);
+                    waves = 3;
+                    break;
+                }
+                case 3: {
+                    Enemy *test_enemy = new EnemyBuff(all_paths[i], map, tower_all, enemy_all);
+                    enemy_all.push_back(test_enemy);
+                    waves = 0;
+                    break;
+                }
+                }
+            }
+        }
+    }
+    else if(counter > 30 && counter <= 45) {
+        int fly_count = fly_index.size();
+        for(int i = 0; i < fly_count; i++) { //只在飞行路径产生敌人
+            switch (waves_fly) {
+            case 0: {
+                Enemy *test_enemy = new FlyAfraid(all_paths[fly_index[i]], map, tower_all);
+                enemy_all.push_back(test_enemy);
+                waves_fly = 1;
+                break;
+            }
+            case 1: {
+                Enemy *test_enemy = new FlyBrave(all_paths[fly_index[i]], map, tower_all);
+                enemy_all.push_back(test_enemy);
+                waves_fly = 0;
+                break;
+            }
+            }
+        }
+    }
+    else if(counter > 45 && counter <= 60) {
+        for(int i = 0; i < path_count; i++) { //所有的地面路径产生地面敌人
+            if(game_map[all_paths[i][1].row][all_paths[i][1].col].state != FLY_PATH) {
+                switch (waves) {
+                case 0: {
+                    Enemy *test_enemy = new EnemyNear(all_paths[i], map, tower_all);
+                    enemy_all.push_back(test_enemy);
+                    waves = 1;
+                    break;
+                }
+                case 1: {
+                    Enemy *test_enemy = new EnemyRemote(all_paths[i], map, tower_all);
+                    enemy_all.push_back(test_enemy);
+                    waves = 2;
+                    break;
+                }
+                case 2: {
+                    Enemy *test_enemy = new EnemySuper(all_paths[i], map, tower_all);
+                    enemy_all.push_back(test_enemy);
+                    waves = 3;
+                    break;
+                }
+                case 3: {
+                    Enemy *test_enemy = new EnemyBuff(all_paths[i], map, tower_all, enemy_all);
+                    enemy_all.push_back(test_enemy);
+                    waves = 0;
+                    break;
+                }
+                }
+            }
+        }
+        int fly_count = fly_index.size();
+        for(int i = 0; i < fly_count; i++) { //飞行路径产生敌人
+            switch (waves_fly) {
+            case 0: {
+                Enemy *test_enemy = new FlyAfraid(all_paths[fly_index[i]], map, tower_all);
+                enemy_all.push_back(test_enemy);
+                waves_fly = 1;
+                break;
+            }
+            case 1: {
+                Enemy *test_enemy = new FlyBrave(all_paths[fly_index[i]], map, tower_all);
+                enemy_all.push_back(test_enemy);
+                waves_fly = 0;
+                break;
+            }
+            }
+        }
+    }
+    else {
+        cout << "all enemies have been generated!" << endl;
+    }
+    counter += 1;
+    cout << "counter is : " << counter << endl;
+
+    /*switch (waves) {
     case 0: {
         Enemy *test_enemy = new EnemyNear(all_paths[0], map, tower_all);
         enemy_all.push_back(test_enemy);
@@ -95,7 +288,7 @@ void GameWindow::generateEnemy() {
         break;
     }
     case 3: {
-        Enemy *test_enemy = new EnemyBuff(all_paths[0], map, tower_all);
+        Enemy *test_enemy = new EnemyBuff(all_paths[0], map, tower_all, enemy_all);
         enemy_all.push_back(test_enemy);
         waves = 4;
         break;
@@ -112,12 +305,12 @@ void GameWindow::generateEnemy() {
         waves = 0;
         break;
     }
-    }
+    }*/
 
 }
 
 //驱动游戏
-void GameWindow::update_all() {
+int GameWindow::update_all() {
 
     //扫描每个塔攻击所在范围内的敌人
     for(auto it = tower_all.begin(); it != tower_all.end();) {
@@ -133,25 +326,31 @@ void GameWindow::update_all() {
     }
 
     //敌人移动
+    if(counter > 60 && enemy_all.empty()) //游戏胜利
+        return 2;
+
     for(auto it = enemy_all.begin(); it != enemy_all.end();) {
         int state = (*it)->update_each();
         if(state == 1) {   // 敌人到达终点
             it = enemy_all.erase(it); // 从画面上消失
             my_health -= 1;
             health_lable->setText(QString("生命：%1").arg(my_health));
+            if(my_health <= 0) { //游戏失败
+                return 1;
+            }
         }
         else if(state == 2){ //敌人死亡
             it = enemy_all.erase(it);
             cout << "enemy count is:" << enemy_all.size() << endl;
             qDebug() << (*it) << "dead!" << endl;
-            my_money += 10; //杀敌奖励
+            my_money += 30; //杀敌奖励
             money_lable->setText(QString("金钱：%1").arg(my_money));
         }
         else
             ++it;
     }
 
-
+    return 0;
 }
 
 //绘图事件 绘制画面上的所有内容
@@ -163,6 +362,8 @@ void GameWindow::paintEvent(QPaintEvent*) {
     map->drawMap(painter); //绘制地图
     drawEnemy(painter);
     drawTower(painter);
+    drawSelectBox(painter);
+
     update();
 }
 
@@ -183,7 +384,14 @@ void GameWindow::drawEnemy(QPainter& painter)
         painter.setBrush(QBrush(Qt::gray, Qt::SolidPattern));
         painter.drawRect(enemy->x+enemy->weight*rate, enemy->y - 10, enemy->weight*(1-rate), 5);
 
-        if(enemy->type == 1 || enemy->type == 4) { //近战敌人
+        if(enemy->type == 1) { //近战敌人
+            painter.drawPixmap(enemy->x, enemy->y, enemy->weight, enemy->height, enemy->picture);
+        }
+        else if(enemy->type == 4) { //buff敌人
+            //painter.setBrush(QBrush(Qt::gray, Qt::DiagCrossPattern));
+            painter.setBrush(QBrush(Qt::NoBrush));
+            painter.setPen("#3A0088");
+            painter.drawEllipse(QPoint(enemy->x + enemy->weight/2, enemy->y + enemy->height/2), enemy->range, enemy->range);
             painter.drawPixmap(enemy->x, enemy->y, enemy->weight, enemy->height, enemy->picture);
         }
         else { //可以发射子弹的敌人
@@ -195,6 +403,34 @@ void GameWindow::drawEnemy(QPainter& painter)
     }
 }
 
+//画出选择框
+void GameWindow::drawSelectBox(QPainter& painter) {
+    if(!selectbox->display)  //不用画
+        return;
+    if(selectbox->type == 0) { //近战塔选择框
+        painter.drawPixmap(selectbox->x, selectbox->y, kCellLen, kCellLen, QPixmap("../source/select-box.png"));
+        for(int i = 0; i < 4; i++) {
+           painter.drawPixmap(selectbox->near_pos[i][0] + 10, selectbox->near_pos[i][1] + 10,
+                              60, 60, selectbox->near_picture[i]);
+           painter.drawPixmap(selectbox->near_pos[i][0], selectbox->near_pos[i][1],
+                              80, 80, QPixmap("../source/each-tower.png"));
+           //cout << "draw near tower " << i << endl;
+        }
+    }
+    else if(selectbox->type == 1) { //远程塔选择框
+        painter.drawPixmap(selectbox->x, selectbox->y, kCellLen, kCellLen, QPixmap("../source/select-box.png"));
+        for(int i = 0; i < 2; i++) {
+            painter.drawPixmap(selectbox->remote_pos[i][0] + 10, selectbox->remote_pos[i][1] + 10,
+                               60, 60, selectbox->remote_picture[i]);
+            painter.drawPixmap(selectbox->remote_pos[i][0], selectbox->remote_pos[i][1],
+                               80, 80, QPixmap("../source/each-tower.png"));
+            //cout << "draw near tower " << i << endl;
+        }
+    }
+    else {
+        cout << "neither near nor remote selectbox!" << endl;
+    }
+}
 //鼠标点击事件
 void GameWindow::mousePressEvent(QMouseEvent* e){
     qDebug() << "click!" << endl;
@@ -204,38 +440,94 @@ void GameWindow::mousePressEvent(QMouseEvent* e){
     int click_col = e->x() / kCellLen;
     Cell click_cell = game_map[click_row][click_col];
 
-    if(click_cell.state == REMOTE) { //该格子可种远程塔单位
-        cout << "plant Remote tower!" << endl;
-        if(click_cell.planted) { //这个格子已经有塔了
-            cout << "row:" << click_row << " col: " << click_col << " has been planted!" << endl;
+    if(!selectbox->display) { //选择框没有显示
+        if(click_cell.state == REMOTE) { //该格子可种远程塔单位
+            if(click_cell.planted) { //这个格子已经有塔了
+                cout << "row:" << click_row << " col: " << click_col << " has been planted!" << endl;
+                return;
+            }
+            else {
+                selectbox->type = 1;
+                selectbox->set_postion(click_col * kCellLen, click_row * kCellLen);
+                selectbox->display = true;
+            }
+        }
+        else if(click_cell.state == PATH) { //该格子可种近战单位
+            if(click_cell.planted) { //这个格子已经有塔了
+                cout << "row:" << click_row << " col: " << click_col << " has been planted!" << endl;
+                return;
+            }
+            else {
+                selectbox->type = 0;
+                selectbox->set_postion(click_col * kCellLen, click_row * kCellLen);
+                selectbox->display = true;
+            }
+        }
+        else { //其他格子不能种塔
+            cout << "row:" << click_row << " col: " << click_col << "can't plant!" << endl;
             return;
         }
-        else { //种植远程单位
-            cout << "row:" << click_row << " col: " << click_col << " plant!!!" << endl;
-            game_map[click_row][click_col].planted = 1;
-            Tower *test_tower = new TowerSuper(click_row, click_col, enemy_all);
-            tower_all.push_back(test_tower);
-            cout << "towers' count is: " << tower_all.size() << endl;
-        }
     }
-    else if(click_cell.state == PATH) { //该格子可种近战单位
-        if(click_cell.planted) { //这个格子已经有塔了
-            cout << "row:" << click_row << " col: " << click_col << " has been planted!" << endl;
-            return;
+    else { //选中了选择框
+        int select_row = selectbox->y/kCellLen, select_col = selectbox->x/kCellLen;
+        if(selectbox->type == 0) { //近战单位选择框
+            if(my_money >= 50 && InArea(e->x(), e->y(), selectbox->x, selectbox->y-80, 80, 80)) { //地刺
+                my_money -= 50;
+                cout << "row:" << click_row << " col: " << click_col << " plant a spikeweed" << endl;
+                game_map[select_row][select_col].planted = 1;
+                Tower *test_tower = new SpikeWeed(select_row, select_col, enemy_all);
+                tower_all.push_back(test_tower);
+            }
+            else if(my_money >= 100 && InArea(e->x(), e->y(), selectbox->x, selectbox->y+80, 80, 80)) { //火炬
+                my_money -= 100;
+                cout << "row:" << click_row << " col: " << click_col << " plant a torchwood" << endl;
+                game_map[select_row][select_col].planted = 1;
+                Tower *test_tower = new TorchWood(select_row, select_col, enemy_all);
+                tower_all.push_back(test_tower);
+            }
+            else if(my_money >= 70 && InArea(e->x(), e->y(), selectbox->x-80, selectbox->y, 80, 80)) { //科学家
+                my_money -= 70;
+                cout << "row:" << click_row << " col: " << click_col << " plant a scientist" << endl;
+                game_map[select_row][select_col].planted = 1;
+                Tower *test_tower = new Scientist(select_row, select_col, enemy_all);
+                tower_all.push_back(test_tower);
+            }
+            else if(my_money >= 30 && InArea(e->x(), e->y(), selectbox->x+80, selectbox->y, 80, 80)) { //坚果
+                my_money -= 30;
+                cout << "row:" << click_row << " col: " << click_col << " plant a nut" << endl;
+                game_map[select_row][select_col].planted = 1;
+                Tower *test_tower = new TowerNut(select_row, select_col, enemy_all);
+                tower_all.push_back(test_tower);
+            }
+            else {
+                cout << "click other in near select" << endl;
+            }
         }
-        else { //种植近战单位
-            cout << "row:" << click_row << " col: " << click_col << " plant!!!" << endl;
-            game_map[click_row][click_col].planted = 1;
-            Tower *test_tower = new TowerNut(click_row, click_col, enemy_all);
-            tower_all.push_back(test_tower);
-            cout << "towers' count is: " << tower_all.size() << endl;
+        else if(selectbox->type == 1) { //远程单位选择框
+            if(my_money >= 120 && InArea(e->x(), e->y(), selectbox->x, selectbox->y-80, 80, 80)) { //普通远程塔
+                my_money -= 120;
+                cout << "row:" << click_row << " col: " << click_col << " plant a spikeweed" << endl;
+                game_map[select_row][select_col].planted = 1;
+                Tower *test_tower = new TowerRemote(select_row, select_col, enemy_all);
+                tower_all.push_back(test_tower);
+            }
+            else if(my_money >= 150 && InArea(e->x(), e->y(), selectbox->x, selectbox->y+80, 80, 80)) { //汽油瓶
+                my_money -= 150;
+                cout << "row:" << click_row << " col: " << click_col << " plant a spikeweed" << endl;
+                game_map[select_row][select_col].planted = 1;
+                Tower *test_tower = new TowerSuper(select_row, select_col, enemy_all);
+                tower_all.push_back(test_tower);
+            }
+            else {
+                cout << "click other in remote select" << endl;
+            }
         }
+        else {
+            cout << "other kind of select box been selected" << endl;
+        }
+        selectbox->display = false; //最后隐藏选择框
+        money_lable->setText(QString("金钱：%1").arg(my_money));
     }
-    else { //其他格子不能种塔
-        cout << "row:" << click_row << " col: " << click_col << "can't plant!" << endl;
-        return;
-    }
-
 }
 
 
@@ -276,13 +568,8 @@ void GameWindow::drawTower(QPainter& painter) {
 
 
 
-//画子弹
-void GameWindow::drawBull(QPainter& painter){
-
-}
-
 //画子弹效果
-void GameWindow::drawHitEffect(QPainter& painter){
+void GameWindow::drawHitEffect(QPainter& painter) {
 
 }
 

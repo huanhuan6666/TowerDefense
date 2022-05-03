@@ -74,10 +74,23 @@ void TowerSuper::attack_enemys(vector<Enemy *>& enemy2attack) {
         return;
     }
 
+    /*
     for(auto &enemy : enemy2attack) {
         if(enemy->state != DEAD) {
             target_enemy = enemy;
             break;
+        }
+    }*/
+
+    double closest = range;
+    int t_cx = x + weight/2, t_cy = y + height/2; //图元中心坐标
+    for(auto &enemy : enemy2attack) { //寻找最近的敌人
+        int e_cx =  enemy->x + enemy->weight/2, e_cy =  enemy->y + enemy->height/2;
+        //攻击范围内的地面敌人
+        double dis = Distance(t_cx, t_cy, e_cx, e_cy);
+        if(enemy->state != DEAD  && dis < closest) {
+            target_enemy = enemy;
+            closest = dis;
         }
     }
 

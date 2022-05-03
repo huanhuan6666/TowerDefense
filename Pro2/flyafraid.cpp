@@ -125,10 +125,11 @@ int FlyAfraid::update_each() {
 
     //寻找范围内所有近战塔和远程塔攻击
     vector<Tower *> tower2attack;
-    for(auto tower : tower_all) {   
-        if(Distance(x + weight/2, y + height/2, tower->x + tower->weight/2, tower->y + tower->height/2) < this->range) {
-            tower2attack.push_back(tower);
-
+    for(auto tower : tower_all) {
+        if(tower->type != 2) { //地刺不能攻击
+            if(Distance(x + weight/2, y + height/2, tower->x + tower->weight/2, tower->y + tower->height/2) < this->range) {
+                tower2attack.push_back(tower);
+            }
         }
     }
     attack_tower(tower2attack);
