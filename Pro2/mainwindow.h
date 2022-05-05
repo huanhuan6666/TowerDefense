@@ -23,13 +23,16 @@ public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
     void generateMap(const string& map_file); //根据配置文件生成地图
-    void paintEvent(QPaintEvent *) override;
 
 
 public:
     Ui::MainWindow *ui;
     GameWindow *game;   //游戏界面
     Map *map;           //地图
+
+    QPushButton *level1;
+    QPushButton *level2;
+    QPushButton *level3;
 
 };
 #endif // MAINWINDOW_H

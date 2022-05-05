@@ -100,4 +100,42 @@ inline bool InArea(double x1, double y1, double x2, double y2, double w, double 
             (y1 >= y2 && y1 <= y2 + h);
 }
 
+inline void my_split(const string &cmd, const char &pattern, vector<string> &res) {
+    res.clear();
+    istringstream is(cmd);
+    string tmp;
+
+    while (getline(is, tmp, pattern)) {
+        res.push_back(tmp);
+    }
+}
+
+struct record_t {
+    string name;
+    string level;
+    int score;
+    string time;
+    record_t(vector<string> each) {
+        name = each[0];
+        level = each[1];
+        score = stoi(each[2]);
+        time = each[3];
+    }
+};
+
+
+inline bool score_greater(const record_t& l, const record_t& r){ //分数降序
+    return l.score > r.score;
+}
+
+
+inline string get_curtime()
+{
+    time_t t = time(nullptr);
+    char tmp[32] = { 0 };
+    strftime(tmp, sizeof(tmp), "%Y-%m-%d %H:%M:%S", localtime(&t));
+    string cur_time(tmp);
+    return cur_time;
+}
+
 #endif // COMMON_H

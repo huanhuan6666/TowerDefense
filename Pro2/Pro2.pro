@@ -10,6 +10,7 @@ CONFIG += c++11
 
 SOURCES += \
     common.cpp \
+    endwindow.cpp \
     enemy.cpp \
     enemybuff.cpp \
     enemynear.cpp \
@@ -31,6 +32,7 @@ SOURCES += \
 
 HEADERS += \
     common.h \
+    endwindow.h \
     enemy.h \
     enemybuff.h \
     enemynear.h \

@@ -23,6 +23,7 @@ Scientist::Scientist(int r, int c, vector<Enemy *>& enemy_all) : Tower(r, c, ene
     y = r * kCellLen + (kCellLen - height)/2;
     picture = "../source/two_r0.png";
 
+    price = 70;
     interval = 5; //调用五次
     counter = 0;
 }

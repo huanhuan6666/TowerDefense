@@ -2,6 +2,7 @@
 #define GAMEWINDOW_H
 #include "common.h"
 #include "map.h"
+#include "endwindow.h"
 
 #include "enemynear.h"
 #include "enemyremote.h"
@@ -50,12 +51,15 @@ public:
     int waves;                      //敌人波数
     int waves_fly;                  //飞行敌人
     int counter;                    //计数器
+    int level;                      //关卡
 
     vector<Enemy *> enemy_all;       //场景中所有敌人
     vector<Tower *> tower_all;       //场景中所有塔
 
+    QMediaPlayer *music;
+
 public:
-    GameWindow(Map* map);           //构造函数 需传入生成好的map指针
+    GameWindow(Map* map, int l);           //构造函数 需传入生成好的map指针
     virtual ~GameWindow();                  //析构函数
     void generateEnemy();           //生产敌人
     int update_all();              //驱动游戏

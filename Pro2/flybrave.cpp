@@ -23,7 +23,7 @@ FlyBrave::FlyBrave(const vector<Pos_t>& _path, Map *map, vector<Tower *>& tower_
 
     interval = 5; //调用五次
     counter = 0;
-    range = 300;
+    range = 250;
 }
 
 //tower2attack为攻击范围内的塔们 这里的策略是全都攻击一遍
@@ -48,11 +48,11 @@ void FlyBrave::attack_tower(vector<Tower *>& tower2attack) {
         }
         else {
             int flag = 0;   //是否打到了敌人
-            for(auto& enemy : tower2attack) {
+            for(auto& tower : tower2attack) {
                 if(InArea((*it)->x+(*it)->w/2, (*it)->y+(*it)->h/2,
-                          enemy->x, enemy->y, enemy->weight, enemy->height)) //子弹碰到了敌人
+                          tower->x, tower->y, tower->weight, tower->height)) //子弹碰到了敌人
                 {
-                    enemy->cur_health -= damage;
+                    tower->cur_health -= damage;
                     delete (*it);
                     flag = 1;
                     it = bullet_all.erase(it);
@@ -85,7 +85,7 @@ void FlyBrave::attack_tower(vector<Tower *>& tower2attack) {
 
         double delta_x = target_tower->x + target_tower->weight/2 - b->x;
         double delta_y = target_tower->y + target_tower->height/2 - b->y;
-        cout << "delta_x is : " << delta_x << endl;
+        //cout << "delta_x is : " << delta_x << endl;
         if(abs(delta_x) < 30) { //斜率为正无穷
             b->flag = 1;
             b->direct = (target_tower->y > b->y)? 1 : -1;
@@ -105,7 +105,7 @@ void FlyBrave::attack_tower(vector<Tower *>& tower2attack) {
         bullet_all.push_back(b);
 
     }
-    cout << "bullet count: " << bullet_all.size() << endl;
+    //cout << "bullet count: " << bullet_all.size() << endl;
 }
 
 

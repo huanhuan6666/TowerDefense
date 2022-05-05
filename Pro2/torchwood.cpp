@@ -23,6 +23,7 @@ TorchWood::TorchWood(int r, int c, vector<Enemy *>& enemy_all) : Tower(r, c, ene
     y = r * kCellLen + (kCellLen - height)/2;
     picture = "../source/TorchWood (3).png";
 
+    price = 100;
     interval = 5; //调用五次
     counter = 0;
 }

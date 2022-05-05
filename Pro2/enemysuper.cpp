@@ -23,7 +23,7 @@ EnemySuper::EnemySuper(const vector<Pos_t>& _path, Map *map, vector<Tower *>& to
 
     interval = 5; //调用五次
     counter = 0;
-    range = 200;
+    range = 220;
 }
 
 //tower2attack为攻击范围内的塔们 这里的策略是全都攻击一遍

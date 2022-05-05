@@ -6,8 +6,8 @@ TowerNut::TowerNut(int r, int c, vector<Enemy *>& enemy_all): Tower(r, c, enemy_
     type = 1; //攻击力为0 坚果
 
     step = 0;
-    all_health = 100;
-    cur_health = 100;
+    all_health = 200;
+    cur_health = 200;
     level = 1;
     damage = 1;
     state = LIVE;
@@ -24,7 +24,7 @@ TowerNut::TowerNut(int r, int c, vector<Enemy *>& enemy_all): Tower(r, c, enemy_
     y = r * kCellLen + (kCellLen - height)/2;
     picture = "../source/WallNut.gif";
 
-
+    price = 30;
     interval = 5; //调用五次
     counter = 0;
 }

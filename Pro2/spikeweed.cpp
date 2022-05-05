@@ -23,12 +23,17 @@ SpikeWeed::SpikeWeed(int r, int c, vector<Enemy *>& enemy_all) : Tower(r, c, ene
     y = r * kCellLen + (kCellLen - height)/2;
     picture = "../source/Spikerock1.png";
 
+    price = 110;
     interval = 5; //调用五次
     counter = 0;
 }
 
 //更新
 int SpikeWeed::update_each() {
+
+    if(state == DEAD){ //死了
+        return 2;
+    }
 
     int t_cx = x + weight/2, t_cy = y + height/2; //图元中心坐标
 

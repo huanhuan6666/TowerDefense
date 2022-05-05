@@ -28,7 +28,10 @@ public:
     int range;      //攻击范围
     int interval;   //攻击间隔
     int counter;    //计数器
+
+    int price;      //价格
     int level;      //等级 初始为1
+    bool selected;  //是否被鼠标选中
 
     QString picture;    //图片路径
     double angle;       //旋转角度

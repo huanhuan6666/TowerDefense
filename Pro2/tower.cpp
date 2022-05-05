@@ -21,6 +21,7 @@ Tower::Tower(int r, int c, vector<Enemy *>& enemy_all): enemy_all(enemy_all) {
     picture = "../source/WallNut.gif";
     target_enemy = nullptr;
 
+    selected = false;
     type = 1; //近战单位塔
     interval = 3; //调用五次
     counter = 0;

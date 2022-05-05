@@ -25,6 +25,7 @@ TowerRemote::TowerRemote(int r, int c, vector<Enemy *>& enemy_all) : Tower(r, c,
 
     picture = "../source/TBottle.png";
 
+    price = 120;
     interval = 4; //调用五次
     counter = 0;
 }
@@ -98,7 +99,7 @@ void TowerRemote::attack_enemys(vector<Enemy *>& enemy2attack) {
         double delta_x = target_enemy->x + target_enemy->weight/2 - b->x;
         double delta_y = target_enemy->y + target_enemy->height/2 - b->y;
         cout << "delta_x is : " << delta_x << endl;
-        if(abs(delta_x) < 30) { //斜率为正无穷
+        if(abs(delta_x) < 15) { //斜率为正无穷
             b->flag = 1;
             b->direct = (target_enemy->y > b->y)? 1 : -1;
         }

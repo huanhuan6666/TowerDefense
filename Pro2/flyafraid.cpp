@@ -23,7 +23,7 @@ FlyAfraid::FlyAfraid(const vector<Pos_t>& _path, Map *map, vector<Tower *>& towe
 
     interval = 5; //调用五次
     counter = 0;
-    range = 300;
+    range = 200;
 }
 
 //tower2attack为攻击范围内的塔们 这里的策略是全都攻击一遍
@@ -85,7 +85,7 @@ void FlyAfraid::attack_tower(vector<Tower *>& tower2attack) {
 
         double delta_x = target_tower->x + target_tower->weight/2 - b->x;
         double delta_y = target_tower->y + target_tower->height/2 - b->y;
-        cout << "delta_x is : " << delta_x << endl;
+        //cout << "delta_x is : " << delta_x << endl;
         if(abs(delta_x) < 30) { //斜率为正无穷
             b->flag = 1;
             b->direct = (target_tower->y > b->y)? 1 : -1;
@@ -105,7 +105,7 @@ void FlyAfraid::attack_tower(vector<Tower *>& tower2attack) {
         bullet_all.push_back(b);
 
     }
-    cout << "bullet count: " << bullet_all.size() << endl;
+    //cout << "bullet count: " << bullet_all.size() << endl;
 }
 
 
