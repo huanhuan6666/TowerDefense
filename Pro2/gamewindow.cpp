@@ -113,6 +113,9 @@ GameWindow::~GameWindow() {
 
 //生产敌人
 void GameWindow::generateEnemy() {
+    /*Enemy *test_enemy = new EnemyNear(all_paths[0], map, tower_all);
+    enemy_all.push_back(test_enemy);
+    return;*/
     if(counter >=0 && counter <= 10) {
         //先在一条路径上产生敌人
         if(game_map[all_paths[0][1].row][all_paths[0][1].col].state != FLY_PATH) {
@@ -423,13 +426,65 @@ void GameWindow::drawTower(QPainter& painter) {
         }
         else { //近战塔直接画
             painter.drawPixmap(tower->x, tower->y, tower->weight, tower->height, tower->picture);
+            if(tower->type == 3 && tower->state == ATTACK) { //科学家攻击时需要画波
+                int tmp_x = tower->col * kCellLen, tmp_y = tower->row * kCellLen;
+                switch (((Scientist *)tower)->direction) { //根据朝向绘制波
+                case UP : {
+                    painter.drawPixmap(tmp_x+30, tmp_y+kCellLen/2-tower->range, 40, tower->range, ((Scientist *)tower)->wave);
+                    break;
+                }
+                case DOWN : {
+                    painter.drawPixmap(tmp_x+30, tmp_y+kCellLen/2, 40, tower->range, ((Scientist *)tower)->wave);
+                    break;
+                }
+                case LEFT : {
+                    painter.drawPixmap(tmp_x+kCellLen/2-tower->range, tmp_y+30, tower->range, 40, ((Scientist *)tower)->wave);
+                    break;
+                }
+                case RIGHT : {
+                    painter.drawPixmap(tmp_x+kCellLen/2, tmp_y+30, tower->range, 30, ((Scientist *)tower)->wave);
+                    break;
+                }
+                }
+            }
         }
 
         if(tower->selected) { //被选中
             painter.setBrush(QBrush(Qt::NoBrush));
             painter.setPen(QPen(Qt::red, 3));
-            painter.drawEllipse(QPoint(tower->x + tower->weight/2, tower->y + tower->height/2), tower->range, tower->range);
-            painter.drawPixmap(tower->x+tower->weight/4, tower->y-60, 40, 40, QPixmap("../source/delete.png"));
+            if(tower->type != 3) { //除了科学家其余塔都无朝向
+                painter.drawEllipse(QPoint(tower->x + tower->weight/2, tower->y + tower->height/2), tower->range, tower->range);
+                painter.drawPixmap(tower->x+tower->weight/4, tower->y-60, 40, 40, QPixmap("../source/delete.png"));
+            }
+            else { //科学家
+                int tmp_x = tower->col * kCellLen, tmp_y = tower->row * kCellLen;
+                switch (((Scientist *)tower)->direction) { //根据朝向绘制攻击范围
+                case UP : {
+                    painter.drawRect(tmp_x, tmp_y+kCellLen/2-tower->range, kCellLen, tower->range);
+                    break;
+                }
+                case DOWN : {
+                    painter.drawRect(tmp_x, tmp_y+kCellLen/2, kCellLen, tower->range);
+                    break;
+                }
+                case LEFT : {
+                    painter.drawRect(tmp_x+kCellLen/2-tower->range, tmp_y, tower->range, kCellLen);
+                    break;
+                }
+                case RIGHT : {
+                    painter.drawRect(tmp_x+kCellLen/2, tmp_y, tower->range, kCellLen);
+                    break;
+                }
+                }
+                //绘制删除按钮和朝向按钮
+                painter.drawPixmap(tower->x, tower->y-60, 40, 40, QPixmap("../source/delete.png"));
+
+                painter.drawPixmap(tower->x+35, tower->y-60, 40, 40, QPixmap("../source/d_up.png"));
+                painter.drawPixmap(tower->x+tower->weight/4, tower->y+tower->height, 40, 40, QPixmap("../source/d_down.png"));
+                painter.drawPixmap(tower->x-40, tower->y, 40, 40, QPixmap("../source/d_left.png"));
+                painter.drawPixmap(tower->x+tower->weight, tower->y, 40, 40, QPixmap("../source/d_right.png"));
+            }
+
         }
 
     }
@@ -448,11 +503,40 @@ void GameWindow::mousePressEvent(QMouseEvent* e){
 
     for(auto & tower : tower_all) {
         if(tower->selected) { //被选中
-            if(InArea(e->x(), e->y(), tower->x+tower->weight/4, tower->y-60, 40, 40)) {
-                tower->state = DEAD; //清除塔只能偿还价格的80%
-                my_money += int(tower->price * 0.8);
-                money_lable->setText(QString("金钱：%1").arg(my_money));
-                return;
+            if(tower->type != 3) { //非科学家
+                if(InArea(e->x(), e->y(), tower->x+tower->weight/4, tower->y-60, 40, 40)) {
+                    tower->state = DEAD; //清除塔只能偿还价格的80%
+                    my_money += int(tower->price * 0.8);
+                    money_lable->setText(QString("金钱：%1").arg(my_money));
+                    return;
+                }
+            }
+            else if(tower->type == 3) { //是科学家
+                if(InArea(e->x(), e->y(), tower->x, tower->y-60, 40, 40)) { //删除
+                    tower->state = DEAD; //清除塔只能偿还价格的80%
+                    my_money += int(tower->price * 0.8);
+                    money_lable->setText(QString("金钱：%1").arg(my_money));
+                    return;
+                }
+                else if(InArea(e->x(), e->y(), tower->x+35, tower->y-60, 40, 40)) { //朝上
+                    ((Scientist *)tower)->direction = UP;
+                }
+                else if(InArea(e->x(), e->y(), tower->x+tower->weight/4, tower->y+tower->height, 40, 40)) { //朝下
+                    ((Scientist *)tower)->direction = DOWN;
+                }
+                else if(InArea(e->x(), e->y(), tower->x-40, tower->y, 40, 40)) { //朝左
+                    ((Scientist *)tower)->direction = LEFT;
+                }
+                else if(InArea(e->x(), e->y(), tower->x+tower->weight, tower->y, 40, 40)) { //朝右
+                    ((Scientist *)tower)->direction = RIGHT;
+                }
+                else { //点击其他区域则解除选择
+                    tower->selected = false;
+                }
+                return ;
+            }
+            else {
+                ;
             }
         }
     }

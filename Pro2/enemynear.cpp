@@ -35,7 +35,7 @@ void EnemyNear::attack_tower(vector<Tower *>& tower2attack) {
     if(counter >= interval) { //间隔过后才攻击
         counter = 0;
         for(auto tower : tower2attack) {
-            if(tower->state == LIVE) {
+            if(tower->state != DEAD) {
                 cout << tower << " tower be attacked by " << this << " with -" << damage << endl;
                 tower->cur_health -= damage;
             }
