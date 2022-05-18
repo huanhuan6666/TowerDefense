@@ -8,7 +8,7 @@ TowerSuper::TowerSuper(int r, int c, vector<Enemy *>& enemy_all) : Tower(r, c, e
     all_health = 100;
     cur_health = 100;
     level = 1;
-    damage = 20;
+    damage = 15;
     state = LIVE;
     speed = 0;
     range = 300;
@@ -46,7 +46,7 @@ void TowerSuper::attack_enemys(vector<Enemy *>& enemy2attack) {
             (*it)->x = 1/(*it)->k * (*it)->y - (*it)->b/(*it)->k;
         }
 
-        if(Distance((*it)->x, (*it)->y, x, y) > range) { //清除超出射程的子弹
+        if(Distance((*it)->x+(*it)->w/2, (*it)->y+(*it)->h/2, x, y) > range) { //清除超出射程的子弹
             delete (*it);
             it = bullet_all.erase(it);
         }
@@ -56,7 +56,13 @@ void TowerSuper::attack_enemys(vector<Enemy *>& enemy2attack) {
                 if(InArea((*it)->x+(*it)->w/2, (*it)->y+(*it)->h/2,
                           enemy->x, enemy->y, enemy->weight, enemy->height)) //子弹碰到了敌人
                 {
-                    enemy->cur_health -= damage;
+                    if(cur_health < 40) //低血量伤害提升
+                        enemy->cur_health -= 25;
+                    else
+                        enemy->cur_health -= damage;
+
+                    //enemy->state = BEEN_ATTACKED;
+                    enemy->attacked = 1;
                     //(*it)->picture = "../source/bullet-boom.png";
                     delete (*it);
                     flag = 1;
@@ -171,6 +177,11 @@ int TowerSuper::update_each() {
         }
 
     }
+
+    if(state == BEEN_ATTACKED) {
+        state = LIVE;
+    }
+
     attack_enemys(enemy2attack);
     return false;
 

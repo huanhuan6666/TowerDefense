@@ -17,6 +17,7 @@
 #include "scientist.h"
 #include "towerremote.h"
 #include "towersuper.h"
+#include "towermagic.h"
 
 #include<QLabel>
 #include<QWidget>
@@ -52,6 +53,9 @@ public:
     int waves_fly;                  //飞行敌人
     int counter;                    //计数器
     int level;                      //关卡
+    int can_summon;                 //是否可以召唤
+    int summon_counter;             //召唤计数器
+    bool magic_tower;               //是否有魔塔
 
     vector<Enemy *> enemy_all;       //场景中所有敌人
     vector<Tower *> tower_all;       //场景中所有塔
@@ -86,12 +90,13 @@ public:
         "../source/WallNut-show.png",
     };    //图片路径
 
-    QString remote_picture[2] = { //两种远程塔的图片
+    QString remote_picture[3] = { //两种远程塔的图片
         "../source/bottle-show.png",
         "../source/FireBottle-show.png",
+        "../source/magic-show.png",
     };
     int near_pos[4][2];
-    int remote_pos[2][2];
+    int remote_pos[3][2];
 
     SelectBox() : display(false), type(-1) { ; }
     void set_postion(int _x, int _y) {
@@ -105,6 +110,8 @@ public:
         remote_pos[0][1] = y - kCellLen;
         remote_pos[1][0] = x;
         remote_pos[1][1] = y + kCellLen;
+        remote_pos[2][0] = x - kCellLen;
+        remote_pos[2][1] = y;
     }
 };
 

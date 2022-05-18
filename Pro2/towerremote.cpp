@@ -8,7 +8,7 @@ TowerRemote::TowerRemote(int r, int c, vector<Enemy *>& enemy_all) : Tower(r, c,
     all_health = 100;
     cur_health = 100;
     level = 1;
-    damage = 30;
+    damage = 15;
     state = LIVE;
     speed = 0;
     range = 300;
@@ -46,7 +46,7 @@ void TowerRemote::attack_enemys(vector<Enemy *>& enemy2attack) {
             (*it)->x = 1/(*it)->k * (*it)->y - (*it)->b/(*it)->k;
         }
 
-        if(Distance((*it)->x, (*it)->y, x, y) > range) { //清除超出射程的子弹
+        if(Distance((*it)->x+(*it)->w/2, (*it)->y+(*it)->h/2, x+weight/2, y+height/2) > range) { //清除超出射程的子弹
             delete (*it);
             it = bullet_all.erase(it);
         }
@@ -57,10 +57,13 @@ void TowerRemote::attack_enemys(vector<Enemy *>& enemy2attack) {
                           enemy->x, enemy->y, enemy->weight, enemy->height)) //子弹碰到了敌人
                 {
                     enemy->cur_health -= damage;
+                    enemy->attacked = 1;
                     (*it)->picture = "../source/bullet-boom.png";
-                    delete (*it);
+                    if(cur_health > 40) {  //低血量子弹可以穿透
+                        delete (*it);
+                        it = bullet_all.erase(it);
+                    }
                     flag = 1;
-                    it = bullet_all.erase(it);
                     break;
                 }
             }
@@ -167,6 +170,10 @@ int TowerRemote::update_each() {
         }
 
     }
+    if(state == BEEN_ATTACKED) {
+        state = LIVE;
+    }
+
     attack_enemys(enemy2attack);
     return false;
 

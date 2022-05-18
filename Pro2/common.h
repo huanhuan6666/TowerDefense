@@ -50,6 +50,8 @@ enum ENEMY_STATE { //敌人的状态
     LIVE = 1,
     BLOCKED = 2, //被阻拦
     ATTACK = 3,  //好战的敌人攻击时会停下来
+    BEEN_ATTACKED = 4, //被攻击
+    BUFFED = 5, //被加血
 };
 
 const int kCellLen = 80; //单元格边长

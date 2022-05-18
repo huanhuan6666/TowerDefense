@@ -25,7 +25,7 @@ Scientist::Scientist(int r, int c, vector<Enemy *>& enemy_all) : Tower(r, c, ene
     y = r * kCellLen + (kCellLen - height)/2;
     picture = "../source/two_r0.png";
 
-    wave = "../source/swaveright(1).png";
+    wave = "../source/swaveright0.png";
     wave_step = 0;
 
     price = 70;
@@ -85,6 +85,7 @@ int Scientist::update_each() {
                 if(e_col == col && e_row <= row &&
                    t_cy - e_cy > 0 && t_cy - e_cy < range) {
                     enemy->cur_health -= damage;
+                    enemy->attacked = 1;
                     haveEnemy = true;
                     if(cur_block < all_block && t_cy - e_cy < kCellLen/2) {
                         enemy->state = BLOCKED;
@@ -146,16 +147,16 @@ int Scientist::update_each() {
         if(direction == RIGHT) {
             switch (wave_step) {
             case 0: {
-                wave = "../source/swaveright(1).png";
+                wave = "../source/swaveright0.png";
                 wave_step = 1;
                 break;
             }
             case 1: {
-                wave = "../source/swaveright(2).png";
+                wave = "../source/swaveright1.png";
                 wave_step = 2;
             }
             case 2: {
-                wave = "../source/swaveright(3).png";
+                wave = "../source/swaveright2.png";
                 wave_step = 0;
             }
             }
@@ -212,5 +213,10 @@ int Scientist::update_each() {
             }
         }
     }
+
+    if(state == BEEN_ATTACKED) {
+        state = LIVE;
+    }
+
     return false;
 }

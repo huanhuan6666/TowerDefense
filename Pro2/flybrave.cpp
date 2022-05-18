@@ -9,7 +9,7 @@ FlyBrave::FlyBrave(const vector<Pos_t>& _path, Map *map, vector<Tower *>& tower_
 
     all_health = 100;
     cur_health = 100;
-    damage = 3;
+    damage = 5;
     state = LIVE;
     speed = 5;
     step = 0;
@@ -23,7 +23,7 @@ FlyBrave::FlyBrave(const vector<Pos_t>& _path, Map *map, vector<Tower *>& tower_
 
     interval = 5; //调用五次
     counter = 0;
-    range = 250;
+    range = 220;
 }
 
 //tower2attack为攻击范围内的塔们 这里的策略是全都攻击一遍
@@ -42,7 +42,7 @@ void FlyBrave::attack_tower(vector<Tower *>& tower2attack) {
             (*it)->x = 1/(*it)->k * (*it)->y - (*it)->b/(*it)->k;
         }
 
-        if(Distance((*it)->x, (*it)->y, x, y) > range) { //清除超出射程的子弹
+        if(Distance((*it)->x+(*it)->w/2, (*it)->y+(*it)->h/2, x+weight/2, y+height/2) > range) { //清除超出射程的子弹
             delete (*it);
             it = bullet_all.erase(it);
         }
@@ -53,6 +53,7 @@ void FlyBrave::attack_tower(vector<Tower *>& tower2attack) {
                           tower->x, tower->y, tower->weight, tower->height)) //子弹碰到了敌人
                 {
                     tower->cur_health -= damage;
+                    tower->state = BEEN_ATTACKED;
                     delete (*it);
                     flag = 1;
                     it = bullet_all.erase(it);
@@ -154,6 +155,8 @@ int FlyBrave::update_each() {
     if(direct == LEFT){
         switch (step) {
         case 0: {
+            if(attacked)
+                attacked = 0;
             picture = "../source/fly-bravel1.png";
             step = 1;
             break;
@@ -170,6 +173,8 @@ int FlyBrave::update_each() {
     }else if(direct == RIGHT){
         switch (step) {
         case 0: {
+            if(attacked)
+                attacked = 0;
             picture = "../source/fly-braver1.png";
             step = 1;
             break;
@@ -186,6 +191,8 @@ int FlyBrave::update_each() {
     }else {
         switch (step) {
         case 0: {
+            if(attacked)
+                attacked = 0;
             picture = "../source/fly-bravel1.png";
             step = 1;
             break;

@@ -93,6 +93,9 @@ GameWindow::GameWindow(Map *map, int l): map(map), all_paths(map->all_paths), ga
 
 
     waves = 0; //波数
+    can_summon = 100; //倒计时
+    summon_counter = 0;
+    magic_tower = false;
 }
 
 //析构函数
@@ -113,7 +116,7 @@ GameWindow::~GameWindow() {
 
 //生产敌人
 void GameWindow::generateEnemy() {
-    /*Enemy *test_enemy = new EnemyNear(all_paths[0], map, tower_all);
+    /*Enemy *test_enemy = new EnemySuper(all_paths[0], map, tower_all);
     enemy_all.push_back(test_enemy);
     return;*/
     if(counter >=0 && counter <= 10) {
@@ -274,10 +277,61 @@ void GameWindow::generateEnemy() {
 //驱动游戏
 int GameWindow::update_all() {
 
+    bool getto = false;
+    can_summon -= 1;
+    int seed = counter % 4;
+    int bias = counter % 7;
+    if(magic_tower && can_summon <= 0) {
+        can_summon = 100;
+        for(auto& cell_row : game_map) {
+            for(auto& cell : cell_row) {
+                if(cell.state == PATH && cell.planted == 0) { //确定召唤塔位置
+                    if(summon_counter < seed+bias) {
+                        summon_counter += 1;
+                        continue;
+                    }
+                    else {
+                        summon_counter = 0;
+                        cell.planted = 1;
+                        getto = true;
+                        switch (seed) {
+                        case 0: {
+                            Tower *test_tower = new TorchWood(cell.row, cell.col, enemy_all);
+                            tower_all.push_back(test_tower);
+                            break;
+                        }
+                        case 1: {
+                            Tower *test_tower = new Scientist(cell.row, cell.col, enemy_all);
+                            tower_all.push_back(test_tower);
+                            break;
+                        }
+                        case 2: {
+                            Tower *test_tower = new TowerNut(cell.row, cell.col, enemy_all);
+                            tower_all.push_back(test_tower);
+                            break;
+                        }
+                        case 3: {
+                            Tower *test_tower = new SpikeWeed(cell.row, cell.col, enemy_all);
+                            tower_all.push_back(test_tower);
+                            break;
+                        }
+                        }
+
+                        break;
+                    }
+                }
+            }
+            if(getto)
+                break;
+        }
+    }
     //扫描每个塔攻击所在范围内的敌人
     for(auto it = tower_all.begin(); it != tower_all.end();) {
         int state = (*it)->update_each();
         if(state == 2) { //塔死亡了
+            if((*it)->type == 7) { //是魔塔
+                magic_tower = false;
+            }
             game_map[(*it)->row][(*it)->col].planted = 0;
             cout << (*it) << " tower dead!!!" << endl;
             delete (*it);
@@ -302,10 +356,11 @@ int GameWindow::update_all() {
             }
         }
         else if(state == 2){ //敌人死亡
+            my_money += (*it)->all_health * 0.3; //杀敌奖励
             it = enemy_all.erase(it);
             cout << "enemy count is:" << enemy_all.size() << endl;
             qDebug() << (*it) << "dead!" << endl;
-            my_money += 30; //杀敌奖励
+            //my_money += 30;
             money_lable->setText(QString("金钱：%1").arg(my_money));
         }
         else
@@ -344,6 +399,17 @@ void GameWindow::drawEnemy(QPainter& painter)
             painter.setBrush(QBrush(Qt::red, Qt::SolidPattern));
         if(rate > 0)
             painter.drawRect(enemy->x, enemy->y - 10, enemy->weight*rate, 5);    //画出敌人血条
+        if(enemy->attacked) { //被攻击标识
+            painter.drawPixmap(enemy->x, enemy->y - 40, 30, 30, QString("../source/attacked.png"));
+        }
+        if(enemy->buffed > 0) { //被加血
+            painter.drawPixmap(enemy->x+enemy->weight-30, enemy->y - 40, 35, 35, QString("../source/BuffLife.png"));
+            enemy->buffed += 1;
+            if(enemy->buffed == 50) {
+                enemy->buffed = -50;
+            }
+        }
+
         painter.setBrush(QBrush(Qt::gray, Qt::SolidPattern));
         painter.drawRect(enemy->x+enemy->weight*rate, enemy->y - 10, enemy->weight*(1-rate), 5);
 
@@ -382,7 +448,7 @@ void GameWindow::drawSelectBox(QPainter& painter) {
     }
     else if(selectbox->type == 1) { //远程塔选择框
         painter.drawPixmap(selectbox->x, selectbox->y, kCellLen, kCellLen, QPixmap("../source/select-box.png"));
-        for(int i = 0; i < 2; i++) {
+        for(int i = 0; i < 3; i++) {
             painter.drawPixmap(selectbox->remote_pos[i][0] + 10, selectbox->remote_pos[i][1] + 10,
                                60, 60, selectbox->remote_picture[i]);
             painter.drawPixmap(selectbox->remote_pos[i][0], selectbox->remote_pos[i][1],
@@ -410,13 +476,34 @@ void GameWindow::drawTower(QPainter& painter) {
         if(rate > 0)
             painter.drawRect(tower->x, tower->y - 10, tower->weight*rate, 5);    //画出塔和血条
 
-        //painter.drawPixmap(tower->x, tower->y, tower->weight, tower->height, tower->picture);
+        if(tower->state == BEEN_ATTACKED) { //被攻击标识
+            painter.drawPixmap(tower->x, tower->y - 40, 30, 30, QString("../source/BeenAttacked.png"));
+        }
 
         if(tower->type >= 5) { //如果是远程塔
             for(const auto &bullet : tower->bullet_all) { //画出这个塔的所有子弹
                 painter.drawPixmap(bullet->x, bullet->y, bullet->w, bullet->h, bullet->picture);
             }
-
+            if(tower->type == 5) {
+                if(tower->cur_health <= 40) { //子弹获得穿透效果
+                    painter.drawPixmap(tower->x+tower->weight-30, tower->y-40, 35, 35, QString("../source/buffFire.png"));
+                }
+            }
+            if(tower->type == 6) {
+                if(tower->cur_health <= 40) { //伤害提升
+                    painter.drawPixmap(tower->x+tower->weight-30, tower->y-40, 35, 35, QString("../source/ondeath.png"));
+                }
+            }
+            if(tower->type == 7) {
+                painter.setBrush(QBrush(Qt::gray, Qt::SolidPattern));
+                painter.drawRect(tower->x, tower->y - 20, tower->weight*can_summon/100.0, 5);
+                if(can_summon > 10) { //沙漏
+                    painter.drawPixmap(tower->x+tower->weight-30, tower->y-40, 35, 35, QString("../source/skill-cd.png"));
+                }
+                else { //生成塔
+                    painter.drawPixmap(tower->x+tower->weight-30, tower->y-40, 35, 35, QString("../source/break.png"));
+                }
+            }
             painter.translate(tower->x + tower->weight/2, tower->y + tower->height/2);
             painter.rotate(tower->angle);
             painter.translate(-(tower->x + tower->weight/2), -(tower->y + tower->height/2)); //原点复位
@@ -425,6 +512,9 @@ void GameWindow::drawTower(QPainter& painter) {
 
         }
         else { //近战塔直接画
+            if(tower->cur_health < 35) { //画出濒死状态
+                painter.drawPixmap(tower->x+tower->weight-30, tower->y-40, 30, 30, QString("../source/angry.png"));
+            }
             painter.drawPixmap(tower->x, tower->y, tower->weight, tower->height, tower->picture);
             if(tower->type == 3 && tower->state == ATTACK) { //科学家攻击时需要画波
                 int tmp_x = tower->col * kCellLen, tmp_y = tower->row * kCellLen;
@@ -583,7 +673,7 @@ void GameWindow::mousePressEvent(QMouseEvent* e){
     else { //选中了选择框
         int select_row = selectbox->y/kCellLen, select_col = selectbox->x/kCellLen;
         if(selectbox->type == 0) { //近战单位选择框
-            if(my_money >= 50 && InArea(e->x(), e->y(), selectbox->x, selectbox->y-80, 80, 80)) { //地刺
+            if(my_money >= 110 && InArea(e->x(), e->y(), selectbox->x, selectbox->y-80, 80, 80)) { //地刺
                 my_money -= 110;
                 cout << "row:" << click_row << " col: " << click_col << " plant a spikeweed" << endl;
                 game_map[select_row][select_col].planted = 1;
@@ -628,6 +718,13 @@ void GameWindow::mousePressEvent(QMouseEvent* e){
                 cout << "row:" << click_row << " col: " << click_col << " plant a spikeweed" << endl;
                 game_map[select_row][select_col].planted = 1;
                 Tower *test_tower = new TowerSuper(select_row, select_col, enemy_all);
+                tower_all.push_back(test_tower);
+            }
+            else if(!magic_tower && my_money >= 300 && InArea(e->x(), e->y(), selectbox->x-80, selectbox->y, 80, 80)) { //可生成塔的远程塔
+                my_money -= 300;
+                magic_tower = true;
+                game_map[select_row][select_col].planted = 1;
+                Tower *test_tower = new TowerMagic(select_row, select_col, enemy_all, can_summon);
                 tower_all.push_back(test_tower);
             }
             else {

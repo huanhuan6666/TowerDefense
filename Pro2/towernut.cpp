@@ -72,7 +72,9 @@ int TowerNut::update_each() {
 
         }
     }
-
+    if(state == BEEN_ATTACKED) {
+        state = LIVE;
+    }
     cout << this << " tower blocks " << cur_block << " enemies!" << endl;
     return false;
 }

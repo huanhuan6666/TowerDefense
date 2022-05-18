@@ -18,6 +18,8 @@ public:
     int speed;      //移动速度
     int type;       //敌人类型 1~4为地面 5~6为飞行
     int range;      //敌人攻击范围
+    int buffed;    //是否被加buff
+    int attacked;   //是否被攻击
 
     QString picture;    //图片路径
     int weight;         //图片宽和高

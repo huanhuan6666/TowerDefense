@@ -9,7 +9,7 @@ EnemySuper::EnemySuper(const vector<Pos_t>& _path, Map *map, vector<Tower *>& to
 
     all_health = 100;
     cur_health = 100;
-    damage = 3;
+    damage = 5;
     state = LIVE;
     speed = 5;
     step = 0;
@@ -42,7 +42,7 @@ void EnemySuper::attack_tower(vector<Tower *>& tower2attack) {
             (*it)->x = 1/(*it)->k * (*it)->y - (*it)->b/(*it)->k;
         }
 
-        if(Distance((*it)->x, (*it)->y, x, y) > range) { //清除超出射程的子弹
+        if(Distance((*it)->x+(*it)->w/2, (*it)->y+(*it)->h/2, x+weight/2, y+height/2) > range) { //清除超出射程的子弹
             delete (*it);
             it = bullet_all.erase(it);
         }
@@ -53,6 +53,7 @@ void EnemySuper::attack_tower(vector<Tower *>& tower2attack) {
                           enemy->x, enemy->y, enemy->weight, enemy->height)) //子弹碰到了敌人
                 {
                     enemy->cur_health -= damage;
+                    enemy->state = BEEN_ATTACKED;
                     delete (*it);
                     flag = 1;
                     it = bullet_all.erase(it);
@@ -128,13 +129,14 @@ int EnemySuper::update_each() {
     for(auto tower : tower_all) {
         //二者中心距离在攻击范围内
         if(tower->type != 2) { //地刺不能攻击
-            if(Distance(x + weight/2, y + height/2, tower->x + tower->weight/2, tower->y + tower->height/2) < this->range) {
+            if(Distance(x + weight/2, y + height/2, tower->x + tower->weight/2, tower->y + tower->height/2) < this->range-3) {
                 tower2attack.push_back(tower);
             }
         }
 
     }
     attack_tower(tower2attack);
+
 
     if(!tower2attack.empty()) { //攻击时停下脚步
         state = ATTACK;
@@ -155,7 +157,12 @@ int EnemySuper::update_each() {
     if(direct == LEFT){
         switch (step) {
         case 0: {
-            picture = "../source/superl1.png";
+            if(attacked) {
+                picture = "../source/superl1hurt.png";
+                attacked = 0;
+            }
+            else
+                picture = "../source/superl1.png";
             step = 1;
             break;
         }
@@ -167,7 +174,12 @@ int EnemySuper::update_each() {
     }else if(direct == RIGHT){
         switch (step) {
         case 0: {
-            picture = "../source/superr1.png";
+            if(attacked) {
+                picture = "../source/superr1hurt.png";
+                attacked = 0;
+            }
+            else
+                picture = "../source/superr1.png";
             step = 1;
             break;
         }
@@ -179,7 +191,12 @@ int EnemySuper::update_each() {
     }else {
         switch (step) {
         case 0: {
-            picture = "../source/superl1.png";
+            if(attacked) {
+                picture = "../source/superl1hurt.png";
+                attacked = 0;
+            }
+            else
+                picture = "../source/superl1.png";
             step = 1;
             break;
         }
@@ -190,7 +207,8 @@ int EnemySuper::update_each() {
         }
     }
 
-    if(state == BLOCKED || state == ATTACK) { //被阻挡停止移动
+    if(state == BLOCKED || state == ATTACK) //被阻挡停止移动
+    {
         return 3;
     }
 

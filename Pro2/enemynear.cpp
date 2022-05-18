@@ -38,6 +38,7 @@ void EnemyNear::attack_tower(vector<Tower *>& tower2attack) {
             if(tower->state != DEAD) {
                 cout << tower << " tower be attacked by " << this << " with -" << damage << endl;
                 tower->cur_health -= damage;
+                tower->state = BEEN_ATTACKED;
             }
         }
     }
@@ -81,7 +82,12 @@ int EnemyNear::update_each() {
     if(direct == LEFT){
         switch (step) {
         case 0: {
-            picture = "../source/Pig1 1.png";
+            if(attacked) {
+                picture = "../source/Pig_hurtl.png";
+                attacked = 0;
+            }
+            else
+                picture = "../source/Pig1 1.png";
             step = 1;
             break;
         }
@@ -93,7 +99,12 @@ int EnemyNear::update_each() {
     }else if(direct == RIGHT){
         switch (step) {
         case 0: {
-            picture = "../source/Pig3 1.png";
+            if(attacked) {
+                picture = "../source/Pig_hurtr.png";
+                attacked = 0;
+            }
+            else
+                picture = "../source/Pig3 1.png";
             step = 1;
             break;
         }
@@ -105,7 +116,12 @@ int EnemyNear::update_each() {
     }else {
         switch (step) {
         case 0: {
-            picture = "../source/Pig1 1.png";
+            if(attacked) {
+                picture = "../source/Pig_hurtl.png";
+                attacked = 0;
+            }
+            else
+                picture = "../source/Pig1 1.png";
             step = 1;
             break;
         }

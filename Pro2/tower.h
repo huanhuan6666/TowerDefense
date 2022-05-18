@@ -32,6 +32,7 @@ public:
     int price;      //价格
     int level;      //等级 初始为1
     bool selected;  //是否被鼠标选中
+    int attacked;   //被攻击
 
     QString picture;    //图片路径
     double angle;       //旋转角度

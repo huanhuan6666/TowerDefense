@@ -37,6 +37,7 @@ void TorchWood::attack_enemys(vector<Enemy *>& enemy2attack) {
     for(auto enemy : enemy2attack) {
         if(enemy->state == LIVE || enemy->state == BLOCKED) {
             cout << enemy << " enemy be attacked by " << this << " with -" << damage << endl;
+            enemy->attacked = 1;
             enemy->cur_health -= damage;
         }
     }
@@ -82,7 +83,7 @@ int TorchWood::update_each() {
         //敌人图元的中心坐标
         int e_cx =  enemy->x + enemy->weight/2, e_cy =  enemy->y + enemy->height/2;
 
-        if(cur_block < all_block &&
+        if(cur_block < all_block && enemy->type <= 4 &&
            abs(e_cx - t_cx) < range && abs(e_cy - t_cy) < range)
         {
             enemy->state = BLOCKED;
@@ -97,6 +98,10 @@ int TorchWood::update_each() {
             enemy2attack.push_back(enemy);
         }
 
+    }
+
+    if(state == BEEN_ATTACKED) {
+        state = LIVE;
     }
 
     attack_enemys(enemy2attack);

@@ -42,7 +42,7 @@ void EnemyRemote::attack_tower(vector<Tower *>& tower2attack) {
             (*it)->x = 1/(*it)->k * (*it)->y - (*it)->b/(*it)->k;
         }
 
-        if(Distance((*it)->x, (*it)->y, x, y) > range) { //清除超出射程的子弹
+        if(Distance((*it)->x+(*it)->w/2, (*it)->y+(*it)->h/2, x+weight/2, y+height/2) > range) { //清除超出射程的子弹
             delete (*it);
             it = bullet_all.erase(it);
         }
@@ -53,6 +53,7 @@ void EnemyRemote::attack_tower(vector<Tower *>& tower2attack) {
                           enemy->x, enemy->y, enemy->weight, enemy->height)) //子弹碰到了敌人
                 {
                     enemy->cur_health -= damage;
+                    enemy->state = BEEN_ATTACKED;
                     delete (*it);
                     flag = 1;
                     it = bullet_all.erase(it);
@@ -128,18 +129,20 @@ int EnemyRemote::update_each() {
     for(auto tower : tower_all) {
         if(tower->type <= 4 && tower->type != 2) {
             //二者中心距离在攻击范围内
-            if(Distance(x + weight/2, y + height/2, tower->x + tower->weight/2, tower->y + tower->height/2) < this->range) {
+            if(Distance(x + weight/2, y + height/2, tower->x + tower->weight/2, tower->y + tower->height/2) < this->range-3) {
                 tower2attack.push_back(tower);
             }
         }
     }
     attack_tower(tower2attack);
+
     if(!tower2attack.empty()) { //攻击时停下脚步
         state = ATTACK;
     }
     else {
         state = LIVE;
     }
+
     //更新处于path的下一个结点上
     if(row != path[path_index].row || col != path[path_index].col) {
         if(abs(x - (col* kCellLen + (kCellLen - weight)/2)) < 5 &&
@@ -152,7 +155,12 @@ int EnemyRemote::update_each() {
     if(direct == LEFT){
         switch (step) {
         case 0: {
-            picture = "../source/monster1.png";
+            if(attacked) {
+                picture = "../source/monster1hurt.png";
+                attacked = 0;
+            }
+            else
+                picture = "../source/monster1.png";
             step = 1;
             break;
         }
@@ -164,7 +172,12 @@ int EnemyRemote::update_each() {
     }else if(direct == RIGHT){
         switch (step) {
         case 0: {
-            picture = "../source/monster3.png";
+            if(attacked) {
+                picture = "../source/monster3hurt.png";
+                attacked = 0;
+            }
+            else
+                picture = "../source/monster3.png";
             step = 1;
             break;
         }
@@ -176,7 +189,12 @@ int EnemyRemote::update_each() {
     }else {
         switch (step) {
         case 0: {
-            picture = "../source/monster1.png";
+            if(attacked) {
+                picture = "../source/monster1hurt.png";
+                attacked = 0;
+            }
+            else
+                picture = "../source/monster1.png";
             step = 1;
             break;
         }
@@ -187,7 +205,8 @@ int EnemyRemote::update_each() {
         }
     }
 
-    if(state == BLOCKED || state == ATTACK) { //被阻挡停止移动
+    if(state == BLOCKED || state == ATTACK) //被阻挡停止移动
+    {
         return 3;
     }
 

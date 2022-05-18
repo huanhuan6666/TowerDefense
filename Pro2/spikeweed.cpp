@@ -46,9 +46,14 @@ int SpikeWeed::update_each() {
         if(enemy->type <= 4  &&
            abs(e_cx - t_cx) < range && abs(e_cy - t_cy) < range)
         {
+            enemy->attacked = 1;
             enemy->cur_health -= damage;
         }
 
+    }
+
+    if(state == BEEN_ATTACKED) {
+        state = LIVE;
     }
 
     return false;

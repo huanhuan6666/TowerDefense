@@ -9,7 +9,7 @@ FlyAfraid::FlyAfraid(const vector<Pos_t>& _path, Map *map, vector<Tower *>& towe
 
     all_health = 100;
     cur_health = 100;
-    damage = 3;
+    damage = 5;
     state = LIVE;
     speed = 5;
     step = 0;
@@ -42,7 +42,7 @@ void FlyAfraid::attack_tower(vector<Tower *>& tower2attack) {
             (*it)->x = 1/(*it)->k * (*it)->y - (*it)->b/(*it)->k;
         }
 
-        if(Distance((*it)->x, (*it)->y, x, y) > range) { //清除超出射程的子弹
+        if(Distance((*it)->x+(*it)->w/2, (*it)->y+(*it)->h/2, x+weight/2, y+height/2) > range) { //清除超出射程的子弹
             delete (*it);
             it = bullet_all.erase(it);
         }
@@ -53,6 +53,7 @@ void FlyAfraid::attack_tower(vector<Tower *>& tower2attack) {
                           enemy->x, enemy->y, enemy->weight, enemy->height)) //子弹碰到了敌人
                 {
                     enemy->cur_health -= damage;
+                    enemy->state = BEEN_ATTACKED;
                     delete (*it);
                     flag = 1;
                     it = bullet_all.erase(it);
@@ -146,6 +147,8 @@ int FlyAfraid::update_each() {
     if(direct == LEFT){
         switch (step) {
         case 0: {
+            if(attacked)
+                attacked = 0;
             picture = "../source/fly-afraidl1.png";
             step = 1;
             break;
@@ -162,6 +165,8 @@ int FlyAfraid::update_each() {
     }else if(direct == RIGHT){
         switch (step) {
         case 0: {
+            if(attacked)
+                attacked = 0;
             picture = "../source/fly-afraidr1.png";
             step = 1;
             break;
@@ -178,6 +183,8 @@ int FlyAfraid::update_each() {
     }else {
         switch (step) {
         case 0: {
+            if(attacked)
+                attacked = 0;
             picture = "../source/fly-afraidl1.png";
             step = 1;
             break;

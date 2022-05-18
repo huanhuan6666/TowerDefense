@@ -15,6 +15,8 @@ Enemy::Enemy(const vector<Pos_t>& _path, Map *map, vector<Tower *>& tower_all):
     picture = "../source/Pig1 1.png";
     weight = 40;
     height = 40;
+    buffed = false;
+    attacked = 0;
 
     x = kCellLen * path[0].col + (kCellLen - weight)/2;
     y = kCellLen * path[0].row + (kCellLen - height)/2;

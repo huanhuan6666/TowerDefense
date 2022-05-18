@@ -26,6 +26,7 @@ SOURCES += \
     spikeweed.cpp \
     torchwood.cpp \
     tower.cpp \
+    towermagic.cpp \
     towernut.cpp \
     towerremote.cpp \
     towersuper.cpp
@@ -47,6 +48,7 @@ HEADERS += \
     spikeweed.h \
     torchwood.h \
     tower.h \
+    towermagic.h \
     towernut.h \
     towerremote.h \
     towersuper.h

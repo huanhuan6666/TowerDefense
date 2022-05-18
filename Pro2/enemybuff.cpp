@@ -37,6 +37,7 @@ void EnemyBuff::buff_enemy(vector<Enemy *> enemy2buff) {
         counter = 0;
         for(auto enemy : enemy2buff) {
             if(enemy->state == LIVE && enemy->cur_health + damage < enemy->all_health) {
+                enemy->buffed = 1;
                 enemy->cur_health += damage;
             }
         }
@@ -59,10 +60,12 @@ int EnemyBuff::update_each() {
     //寻找范围内所有敌人并加buff
     vector<Enemy *> enemy2buff;
     for(auto enemy : enemy_all) {
+        //enemy->buffed = false;
         if(enemy->type != 4) { //不能给同类型加buff
             //二者中心距离在攻击范围内
             if(Distance(x + weight/2, y + height/2, enemy->x + enemy->weight/2, enemy->y + enemy->height/2) < this->range) {
                 enemy2buff.push_back(enemy);
+                enemy->buffed = 1;
             }
         }
     }
@@ -81,7 +84,12 @@ int EnemyBuff::update_each() {
     if(direct == LEFT){
         switch (step) {
         case 0: {
-            picture = "../source/buffl1.png";
+            if(attacked) {
+                picture = "../source/buffl1hurt.png";
+                attacked = 0;
+            }
+            else
+                picture = "../source/buffl1.png";
             step = 1;
             break;
         }
@@ -93,7 +101,12 @@ int EnemyBuff::update_each() {
     }else if(direct == RIGHT){
         switch (step) {
         case 0: {
-            picture = "../source/buffr1.png";
+            if(attacked) {
+                picture = "../source/buffr1hurt.png";
+                attacked = 0;
+            }
+            else
+                picture = "../source/buffr1.png";
             step = 1;
             break;
         }
@@ -105,7 +118,12 @@ int EnemyBuff::update_each() {
     }else {
         switch (step) {
         case 0: {
-            picture = "../source/buffl1.png";
+            if(attacked) {
+                picture = "../source/buffl1hurt.png";
+                attacked = 0;
+            }
+            else
+                picture = "../source/buffl1.png";
             step = 1;
             break;
         }
